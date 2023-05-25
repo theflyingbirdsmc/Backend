@@ -1,0 +1,41 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: nexus
+spec:
+  selector:
+    matchLabels:
+      app: nexus
+  template:
+    metadata:
+      labels:
+        app: nexus
+    spec:
+      securityContext:
+        runAsUser: 1000
+        fsGroup: 1000
+      containers:
+      - name: nexus
+        image: sonatype/nexus3:latest
+        resources:
+          limits:
+            memory: "4Gi"
+            cpu: "1000m"
+          requests:
+            memory: "2Gi"
+            cpu: "500m"
+        ports:
+        - containerPort: 8081
+        volumeMounts:
+        - name: password-volume
+          mountPath: /nexus-data/admin.password
+          subPath: password
+        - name: nexus-pv-storage
+          mountPath: /nexus-data
+      volumes:
+      - name: password-volume
+        secret:
+          secretName: artifactory-admin-password
+      - name: nexus-pv-storage
+        persistentVolumeClaim:
+          claimName: nexus-pv-claim
