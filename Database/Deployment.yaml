@@ -1,0 +1,38 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: mariadb
+spec:
+  replicas: 1 
+  selector:
+    matchLabels:
+      app: mariadb
+  template: 
+    metadata:
+      labels:
+        app: mariadb
+    spec:
+      securityContext:
+        runAsUser: 1000
+        fsGroup: 1000
+      containers:
+      - name: mariadb
+        image: mariadb
+        ports:
+        - containerPort: 3306
+        resources:
+          limits:
+            memory: "2048Mi"
+            cpu: "1000m"
+        env:
+        - name: MARIADB_ALLOW_EMPTY_ROOT_PASSWORD
+          value: "0" # if it is 1 and root_password is set, root_password takes precedance
+        - name: mariadbrootpassword
+          value: secret
+        volumeMounts:
+        - name: mariadb-pv-storage
+          mountPath: /var/lib/mysql
+      volumes:
+      - name: mariadb-pv-storage
+        persistentVolumeClaim:
+          claimName: mariadb-pv-claim
