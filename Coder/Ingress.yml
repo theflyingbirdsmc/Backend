@@ -1,0 +1,17 @@
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: coder.theflyingbirds.local
+  namespace: coder
+spec:
+  rules:
+    - host: coder.theflyingbirds.local
+      http:
+        paths:
+          - path: /
+            pathType: Prefix
+            backend:
+              service:
+                name: coder-nodeport
+                port:
+                  number: 8080
