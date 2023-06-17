@@ -14,3 +14,13 @@ spec:
                   number: 8081
             path: /
             pathType: Prefix
+    - host: registry.theflyingbirds.local
+      http:
+        paths:
+          - backend:
+              service:
+                name: nexus-service
+                port:
+                  number: 8082
+            path: /
+            pathType: Prefix

@@ -25,7 +25,8 @@ spec:
             memory: "2Gi"
             cpu: "500m"
         ports:
-        - containerPort: 8081
+        - containerPort: 8081 # Port needed for main site
+        - containerPort: 8082 # Port needed for registry
         volumeMounts:
         - name: password-volume
           mountPath: /nexus-data/admin.password
