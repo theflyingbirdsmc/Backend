@@ -1,0 +1,12 @@
+all:
+  children:
+    vars:
+      domain_name: "theflyingbirds.local"
+    ContainerHosts:
+      hosts:
+        tfb-dev1:
+          ansible_host: 192.168.122.227
+          hostname: tfb-dev1
+          cluster_mode: master
+          ansible_become: true
+          ansible_become_password: skrubbe

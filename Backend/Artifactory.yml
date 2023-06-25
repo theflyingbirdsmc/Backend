@@ -1,0 +1,107 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: nexus
+spec:
+  selector:
+    matchLabels:
+      app: nexus
+  template:
+    metadata:
+      labels:
+        app: nexus
+    spec:
+      securityContext:
+        runAsUser: 1000
+        fsGroup: 1000
+      containers:
+      - name: nexus
+        image: sonatype/nexus3:latest
+        resources:
+          limits:
+            memory: "4Gi"
+            cpu: "1000m"
+          requests:
+            memory: "2Gi"
+            cpu: "500m"
+        ports:
+        - containerPort: 8081 # Port needed for main site
+        - containerPort: 8082 # Port needed for registry
+        volumeMounts:
+        - name: password-volume
+          mountPath: /nexus-data/admin.password
+          subPath: password
+        - name: nexus-pv-storage
+          mountPath: /nexus-data
+      volumes:
+      - name: password-volume
+        secret:
+          secretName: artifactory-admin-password
+      - name: nexus-pv-storage
+        persistentVolumeClaim:
+          claimName: nexus-pv-claim
+---
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: artifactory.theflyingbirds.local
+spec:
+  rules:
+    - host: artifactory.theflyingbirds.local
+      http:
+        paths:
+          - backend:
+              service:
+                name: nexus-service
+                port:
+                  number: 8081
+            path: /
+            pathType: Prefix
+    - host: registry.theflyingbirds.local
+      http:
+        paths:
+          - backend:
+              service:
+                name: nexus-service
+                port:
+                  number: 8082
+            path: /
+            pathType: Prefix
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: nexus-service
+spec:
+  type: NodePort
+  selector:
+    app: nexus
+  ports:
+  - name: nexus-main-site # Add this line
+    port: 8081
+    targetPort: 8081
+    #nodePort: 30100
+  - name: nexus-registry # And add this line
+    port: 8082
+    targetPort: 8082
+    #nodePort: 30101
+---
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: nexus-pv-claim
+spec:
+  resources:
+    requests:
+      storage: 20G
+  volumeMode: Filesystem
+  accessModes:
+    - ReadWriteOnce
+---
+apiVersion: v1
+kind: Secret
+metadata:
+  name: artifactory-admin-password
+type: Opaque
+stringData:
+  password: Passw0rd123#!
