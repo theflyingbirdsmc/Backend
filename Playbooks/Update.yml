@@ -1,0 +1,15 @@
+---
+- name: Configure iptables
+  hosts: ContainerHosts
+
+  tasks:
+    - name: Add iptables rule
+      when: cluster_mode == 'master'
+      iptables:
+        table: nat
+        chain: PREROUTING
+        protocol: tcp
+        destination_port: 25565
+        jump: REDIRECT
+        to_ports: 32767
+      become: true

@@ -1,0 +1,26 @@
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: artifactory.theflyingbirds.local
+spec:
+  rules:
+    - host: artifactory.theflyingbirds.local
+      http:
+        paths:
+          - backend:
+              service:
+                name: nexus-service
+                port:
+                  number: 8081
+            path: /
+            pathType: Prefix
+    - host: registry.theflyingbirds.local
+      http:
+        paths:
+          - backend:
+              service:
+                name: nexus-service
+                port:
+                  number: 8082
+            path: /
+            pathType: Prefix
